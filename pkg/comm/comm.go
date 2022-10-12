@@ -1,4 +1,4 @@
-package messenger
+package comm
 
 type Message struct {
 	Conversation int64
@@ -7,4 +7,10 @@ type Message struct {
 
 type Messenger interface {
 	Message(Message) error
+}
+
+type Handler func(Message) error
+
+type Listener interface {
+	Listen(Handler) error
 }

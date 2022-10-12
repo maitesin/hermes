@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/maitesin/hermes/pkg/messenger"
+	"github.com/maitesin/hermes/pkg/comm"
 )
 
 type Messenger struct {
@@ -29,7 +29,7 @@ func NewMessenger(ctx context.Context, cfg Config) (*Messenger, error) {
 	}, nil
 }
 
-func (m *Messenger) Message(message messenger.Message) error {
+func (m *Messenger) Message(message comm.Message) error {
 	_, err := m.api.Send(tgbotapi.NewMessage(message.Conversation, message.Text))
 	return err
 }
