@@ -1,0 +1,18 @@
+name: lint
+on: [push, pull_request]
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '^1.18'
+      - name: Download linting tools
+        run: make deps
+      - name: Run formatter
+        run: make fmt-check
+      - name: Run lint
+        run: make lint
