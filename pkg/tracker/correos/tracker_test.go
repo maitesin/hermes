@@ -23,11 +23,11 @@ func (rtm *roundTripperMock) RoundTrip(*http.Request) (*http.Response, error) {
 	return rtm.Response, rtm.RespErr
 }
 
-func workingClient(response string) *http.Client {
+func workingClient(reader io.Reader) *http.Client {
 	return &http.Client{
 		Transport: &roundTripperMock{
 			Response: &http.Response{
-				Body: io.NopCloser(bytes.NewBufferString(response)),
+				Body: io.NopCloser(reader),
 			},
 		},
 	}
@@ -37,6 +37,15 @@ func failingClient() *http.Client {
 	return &http.Client{
 		Transport: &roundTripperMock{},
 	}
+}
+
+type readerMock struct {
+	n   int
+	err error
+}
+
+func (rm *readerMock) Read([]byte) (n int, err error) {
+	return rm.n, rm.err
 }
 
 func validPayload() string {
@@ -109,7 +118,7 @@ func TestTracker_Track(t *testing.T) {
 			name: `Given a working HTTP client and a valid tracker ID,
                    when the method Track is called,
                    then it returns a list of delivery events`,
-			client: workingClient(validPayload()),
+			client: workingClient(bytes.NewBufferString(validPayload())),
 			want: []tracker.DeliveryEvent{
 				{
 					Timestamp:   "18/11/2021 18:25:51",
@@ -127,10 +136,18 @@ func TestTracker_Track(t *testing.T) {
 			wantErr: &url.Error{},
 		},
 		{
+			name: `Given a failing HTTP client and a valid tracker ID,
+                   when the method Track is called,
+                   then it returns an error regarding the HTTP client not working`,
+			client:  workingClient(&readerMock{n: 0, err: errors.New("")}),
+			want:    nil,
+			wantErr: errors.New(""),
+		},
+		{
 			name: `Given a working HTTP client and a valid tracker ID,
                    when the method Track is called and the response is an invalid JSON,
                    then it returns an error regarding the response body`,
-			client:  workingClient(""),
+			client:  workingClient(bytes.NewBufferString("")),
 			want:    nil,
 			wantErr: &json.SyntaxError{},
 		},
@@ -138,7 +155,7 @@ func TestTracker_Track(t *testing.T) {
 			name: `Given a working HTTP client and a valid tracker ID,
                    when the method Track is called and the response contains multiple shipment information,
                    then it returns an error regarding the response containing multiple shipment information`,
-			client:  workingClient(tooManyShipmentsPayload()),
+			client:  workingClient(bytes.NewBufferString(tooManyShipmentsPayload())),
 			want:    nil,
 			wantErr: errors.New(""),
 		},
