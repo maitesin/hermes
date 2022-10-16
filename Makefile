@@ -1,16 +1,16 @@
-.PHONY: deps fmt fmt-check lint
+.PHONY: deps fmt fmt-check lint test
 
 deps:
 	go install mvdan.cc/gofumpt@latest
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
-fmt: deps
+fmt:
 	gofumpt -w .
 
-fmt-check: deps
+fmt-check:
 	gofumpt -d .
 
-lint: deps
+lint:
 	golangci-lint run
 
 test:

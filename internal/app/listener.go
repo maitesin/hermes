@@ -1,10 +1,11 @@
 package app
 
 import (
-	"github.com/maitesin/hermes/pkg/comm"
-	"github.com/maitesin/hermes/pkg/tracker"
 	"log"
 	"strings"
+
+	"github.com/maitesin/hermes/pkg/comm"
+	"github.com/maitesin/hermes/pkg/tracker"
 )
 
 func Listen(t tracker.Tracker) comm.Handler {
