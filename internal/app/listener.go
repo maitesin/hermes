@@ -1,6 +1,8 @@
 package app
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"strings"
 
@@ -8,14 +10,24 @@ import (
 	"github.com/maitesin/hermes/pkg/tracker"
 )
 
-func Listen(t tracker.Tracker) comm.Handler {
+func Listen(ctx context.Context, t tracker.Tracker, repo DeliveriesRepository) comm.Handler {
 	return func(message comm.Message) error {
-		events, err := t.Track(strings.TrimSpace(message.Text))
+		trackingID := strings.TrimSpace(message.Text)
+		events, err := t.Track(trackingID)
 		if err != nil {
 			return err
 		}
 
-		log.Printf("[events] %#v", events)
+		eventsLog := fmt.Sprintf("%v", events)
+		log.Printf("[events] %s", eventsLog)
+
+		delivery := NewDelivery(trackingID, eventsLog, message.Conversation, false)
+		delivery.updateDelivered()
+
+		err = repo.Insert(ctx, delivery)
+		if err != nil {
+			return err
+		}
 
 		return nil
 	}
