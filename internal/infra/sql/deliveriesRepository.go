@@ -36,6 +36,14 @@ func (dr *DeliveriesRepository) Insert(ctx context.Context, delivery app.Deliver
 	return err
 }
 
+func (dr *DeliveriesRepository) Update(ctx context.Context, delivery app.Delivery) error {
+	sDelivery := app2SQLDelivery(delivery)
+
+	return dr.sess.WithContext(ctx).
+		Collection(deliveryTable).
+		UpdateReturning(sDelivery)
+}
+
 func (dr *DeliveriesRepository) FindByTrackingID(ctx context.Context, trackingID string) (app.Delivery, error) {
 	var delivery Delivery
 	err := dr.sess.WithContext(ctx).

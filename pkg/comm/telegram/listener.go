@@ -28,21 +28,24 @@ func NewListener(ctx context.Context, cfg Config) (*Listener, error) {
 	}, nil
 }
 
-func (l *Listener) Listen(handler comm.Handler) error {
-	for update := range l.getUpdatesChannel() {
-		if update.Message == nil { // ignore any non-Message Updates
-			continue
-		}
+func (l *Listener) Listen(ctx context.Context, handler comm.Handler) error {
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case update := <-l.getUpdatesChannel():
+			if update.Message == nil { // ignore any non-Message Updates
+				continue
+			}
 
-		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-		msg := comm.Message{Conversation: update.Message.Chat.ID, Text: update.Message.Text}
-		err := handler(msg)
-		if err != nil {
-			log.Printf("handler failed with %v for message %#v", err, msg)
+			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+			msg := comm.Message{Conversation: update.Message.Chat.ID, Text: update.Message.Text}
+			err := handler(msg)
+			if err != nil {
+				log.Printf("handler failed with %v for message %#v", err, msg)
+			}
 		}
 	}
-
-	return nil
 }
 
 func (l *Listener) getUpdatesChannel() tgbotapi.UpdatesChannel {

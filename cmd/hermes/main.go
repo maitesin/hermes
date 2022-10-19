@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -77,9 +79,26 @@ func main() {
 		return
 	}
 
-	err = listener.Listen(app.Listen(ctx, correosTracker, deliveriesRepository))
+	go func() {
+		err := listener.Listen(ctx, app.Listen(ctx, correosTracker, deliveriesRepository))
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}()
+
+	ticker := time.NewTicker(time.Minute)
+	messenger, err := telegram.NewMessenger(ctx, cfg.Telegram)
 	if err != nil {
 		log.Panic(err)
 		return
 	}
+
+	err = app.Checker(ctx, ticker, correosTracker, deliveriesRepository, messenger)
+	if err != nil {
+		log.Panic(err)
+		return
+	}
+
+	<-ctx.Done()
 }
