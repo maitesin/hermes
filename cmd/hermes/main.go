@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"embed"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -32,34 +31,34 @@ func main() {
 
 	dbConn, err := sql.Open("postgres", cfg.SQL.DatabaseURL())
 	if err != nil {
-		fmt.Println(err)
+		log.Panic(err)
 		return
 	}
 	defer dbConn.Close()
 
 	pgConn, err := postgresql.New(dbConn)
 	if err != nil {
-		fmt.Println(err)
+		log.Panic(err)
 		return
 	}
 	defer pgConn.Close()
 
 	dbDriver, err := postgres.WithInstance(dbConn, &postgres.Config{})
 	if err != nil {
-		fmt.Println(err)
+		log.Panic(err)
 		return
 	}
 
 	migrations.RegisterMigrationDriver(migrationsFS)
 	migrations, err := migrate.NewWithDatabaseInstance("embed://migrations", "marvin", dbDriver)
 	if err != nil {
-		fmt.Println(err)
+		log.Panic(err)
 		return
 	}
 
 	err = migrations.Up()
 	if err != nil && err.Error() != "no change" {
-		fmt.Println(err)
+		log.Panic(err)
 		return
 	}
 
