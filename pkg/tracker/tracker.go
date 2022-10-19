@@ -1,7 +1,7 @@
 package tracker
 
 type Tracker interface {
-	Track(id string) ([]DeliveryEvent, error)
+	Track(id string) ([]DeliveryEvent, bool, error)
 }
 
 type DeliveryEvent struct {

@@ -1,7 +1,5 @@
 package app
 
-import "strings"
-
 type Delivery struct {
 	TrackingID     string
 	Log            string
@@ -16,8 +14,4 @@ func NewDelivery(trackingID, log string, conversationID int64, delivered bool) D
 		ConversationID: conversationID,
 		Delivered:      delivered,
 	}
-}
-
-func (d *Delivery) updateDelivered() {
-	d.Delivered = strings.Contains(d.Log, "Entregado")
 }
