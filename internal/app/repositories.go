@@ -4,6 +4,8 @@ import (
 	"context"
 )
 
+//go:generate mockgen -destination=mocks/deliveries_repository.go -package=mocks . DeliveriesRepository
+
 type DeliveriesRepository interface {
 	Insert(ctx context.Context, delivery Delivery) error
 	Update(ctx context.Context, delivery Delivery) error
