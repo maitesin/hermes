@@ -41,7 +41,7 @@ func Checker(
 					Conversation: dbDelivery.ConversationID,
 					Text:         eventsLog,
 				}
-				fmt.Printf("Message to be sent: %#v", msg)
+				//fmt.Printf("Message to be sent: %#v", msg)
 				err = messenger.Message(
 					msg,
 				)

@@ -5,6 +5,7 @@ type Message struct {
 	Text         string
 }
 
+//go:generate mockgen -destination=mocks/messenger.go -package=mocks . Messenger
 type Messenger interface {
 	Message(Message) error
 }
