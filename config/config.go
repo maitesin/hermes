@@ -13,7 +13,7 @@ type Config struct {
 	SQL      sql.Config
 }
 
-func NewConfig() (Config, error) {
+func New() (Config, error) {
 	telegramToken := os.Getenv("TELEGRAM_TOKEN")
 	if telegramToken == "" {
 		return Config{}, Error{reason: "TELEGRAM_TOKEN not set"}

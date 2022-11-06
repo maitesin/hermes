@@ -25,7 +25,7 @@ var migrationsFS embed.FS
 
 func main() {
 	ctx := context.Background()
-	cfg, err := config.NewConfig()
+	cfg, err := config.New()
 	if err != nil {
 		log.Panic(err)
 		return

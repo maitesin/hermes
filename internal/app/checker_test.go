@@ -117,7 +117,8 @@ func TestChecker(t *testing.T) {
 			},
 			messengerChecks: func(mm *mMock.MockMessenger) {},
 			wantErr:         nil,
-		}, {
+		},
+		{
 			name: `Given a failing tracker checker, a working deliveries repository and a valid messenger checker,
 					when the Checker function is called, a new event is called by the time ticker and a the list of undelivered shipments is retrieved,
 					then the tracker returns a failure`,
@@ -179,7 +180,8 @@ func TestChecker(t *testing.T) {
 					Return(errors.New("something went wrong"))
 			},
 			wantErr: errors.New("something went wrong"),
-		}, {
+		},
+		{
 			name: `Given a working tracker checker, a failing deliveries repository and a valid messenger checker,
 					when the Checker function is called, a new event is called by the time ticker and a the list of undelivered shipments is retrieved,
 					then the deliveries repository fails to update the information`,
