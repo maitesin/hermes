@@ -1,23 +1,21 @@
-.PHONY: deps deps-fmt deps-lint deps-test fmt fmt-check lint test
+.PHONY: fmt fmt-check lint generate test
 
-deps: deps-fmt deps-lint deps-test
-
-deps-fmt:
+$(GOPATH)/bin/gofumpt:
 	go install mvdan.cc/gofumpt@latest
 
-deps-lint:
+$(GOPATH)/bin/golangci-lint:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 $(GOPATH)/bin/mockgen:
 	go install github.com/golang/mock/mockgen@latest
 
-fmt:
+fmt: $(GOPATH)/bin/gofumpt
 	gofumpt -w .
 
-fmt-check:
+fmt-check: $(GOPATH)/bin/gofumpt
 	gofumpt -d .
 
-lint:
+lint: $(GOPATH)/bin/golangci-lint
 	golangci-lint run
 
 generate: $(GOPATH)/bin/mockgen
