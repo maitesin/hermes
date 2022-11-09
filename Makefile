@@ -1,7 +1,5 @@
 .PHONY: deps deps-fmt deps-lint deps-test fmt fmt-check lint test
 
-GOPATH ?= $(GOPATH)
-
 deps: deps-fmt deps-lint deps-test
 
 deps-fmt:
