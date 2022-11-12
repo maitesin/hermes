@@ -11,6 +11,13 @@ const (
 	deliveryTable = "deliveries"
 )
 
+func onConflictUpdateLogAndDelivered(queryIn string) string {
+	return queryIn + `ON CONFLICT (tracking_id) DO UPDATE SET
+        log = EXCLUDED.log,
+        delivered = EXCLUDED.delivered
+`
+}
+
 type Delivery struct {
 	TrackingID     string `db:"tracking_id"`
 	Log            string `db:"log"`
@@ -30,18 +37,13 @@ func (dr *DeliveriesRepository) Insert(ctx context.Context, delivery app.Deliver
 	sDelivery := app2SQLDelivery(delivery)
 
 	_, err := dr.sess.WithContext(ctx).
-		Collection(deliveryTable).
-		Insert(sDelivery)
+		SQL().
+		InsertInto(deliveryTable).
+		Values(sDelivery).
+		Amend(onConflictUpdateLogAndDelivered).
+		Exec()
 
 	return err
-}
-
-func (dr *DeliveriesRepository) Update(ctx context.Context, delivery app.Delivery) error {
-	sDelivery := app2SQLDelivery(delivery)
-
-	return dr.sess.WithContext(ctx).
-		Collection(deliveryTable).
-		UpdateReturning(sDelivery)
 }
 
 func (dr *DeliveriesRepository) FindByTrackingID(ctx context.Context, trackingID string) (app.Delivery, error) {

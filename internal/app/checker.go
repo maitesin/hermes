@@ -33,10 +33,6 @@ func Checker(
 				}
 
 				eventsLog := fmt.Sprintf("%v", events)
-				if eventsLog == dbDelivery.Log {
-					continue
-				}
-
 				msg := comm.Message{
 					Conversation: dbDelivery.ConversationID,
 					Text:         eventsLog,
@@ -49,7 +45,7 @@ func Checker(
 					return err
 				}
 
-				err = deliveriesRepository.Update(
+				err = deliveriesRepository.Insert(
 					ctx,
 					NewDelivery(
 						dbDelivery.TrackingID,

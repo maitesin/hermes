@@ -57,7 +57,7 @@ func TestChecker(t *testing.T) {
 
 				mdr.
 					EXPECT().
-					Update(
+					Insert(
 						ctx,
 						app.NewDelivery("1234", "[{666 Something}]", 9876, false),
 					).
@@ -87,36 +87,6 @@ func TestChecker(t *testing.T) {
 			},
 			messengerChecks: func(mm *mMock.MockMessenger) {},
 			wantErr:         errors.New("something went wrong"),
-		},
-		{
-			name: `Given a working tracker checker, a working deliveries repository and a valid messenger checker,
-					when the Checker function is called, a new event is called by the time ticker and a the list of undelivered shipments is retrieved,
-					then each of the deliveries is checked, but no new information is found and nothing is stored`,
-			trackerChecks: func(mt *tmock.MockTracker) {
-				mt.
-					EXPECT().
-					Track("1234").
-					Return([]tracker.DeliveryEvent{
-						{
-							Timestamp:   "666",
-							Information: "Something",
-						},
-					}, false, nil)
-			},
-			deliveriesRepositoryChecks: func(ctx context.Context, mdr *appMock.MockDeliveriesRepository) {
-				mdr.
-					EXPECT().
-					FindAllNotDelivered(ctx).
-					Return([]app.Delivery{
-						{
-							TrackingID:     "1234",
-							Log:            "[{666 Something}]",
-							ConversationID: 9876,
-						},
-					}, nil)
-			},
-			messengerChecks: func(mm *mMock.MockMessenger) {},
-			wantErr:         nil,
 		},
 		{
 			name: `Given a failing tracker checker, a working deliveries repository and a valid messenger checker,
@@ -210,7 +180,7 @@ func TestChecker(t *testing.T) {
 
 				mdr.
 					EXPECT().
-					Update(
+					Insert(
 						ctx,
 						app.NewDelivery("1234", "[{666 Something}]", 9876, false),
 					).

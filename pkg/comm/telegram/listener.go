@@ -38,7 +38,7 @@ func (l *Listener) Listen(ctx context.Context, handler comm.Handler) error {
 				continue
 			}
 
-			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+			log.Printf("[%s](%d) %q", update.Message.From.UserName, update.Message.Chat.ID, update.Message.Text)
 			msg := comm.Message{Conversation: update.Message.Chat.ID, Text: update.Message.Text}
 			err := handler(msg)
 			if err != nil {
