@@ -59,7 +59,7 @@ func TestChecker(t *testing.T) {
 					EXPECT().
 					Insert(
 						ctx,
-						app.NewDelivery("1234", "[{666 Something}]", 9876, false),
+						app.NewDelivery("1234", "- 666:\n  Something\n", 9876, false),
 					).
 					Return(nil)
 			},
@@ -68,7 +68,7 @@ func TestChecker(t *testing.T) {
 					EXPECT().
 					Message(comm.Message{
 						Conversation: 9876,
-						Text:         "[{666 Something}]",
+						Text:         "1234:\n- 666:\n  Something\n",
 					}).
 					Return(nil)
 			},
@@ -145,7 +145,7 @@ func TestChecker(t *testing.T) {
 					EXPECT().
 					Message(comm.Message{
 						Conversation: 9876,
-						Text:         "[{666 Something}]",
+						Text:         "1234:\n- 666:\n  Something\n",
 					}).
 					Return(errors.New("something went wrong"))
 			},
@@ -182,7 +182,7 @@ func TestChecker(t *testing.T) {
 					EXPECT().
 					Insert(
 						ctx,
-						app.NewDelivery("1234", "[{666 Something}]", 9876, false),
+						app.NewDelivery("1234", "- 666:\n  Something\n", 9876, false),
 					).
 					Return(errors.New("something went wrong"))
 			},
@@ -191,7 +191,7 @@ func TestChecker(t *testing.T) {
 					EXPECT().
 					Message(comm.Message{
 						Conversation: 9876,
-						Text:         "[{666 Something}]",
+						Text:         "1234:\n- 666:\n  Something\n",
 					}).
 					Return(nil)
 			},
