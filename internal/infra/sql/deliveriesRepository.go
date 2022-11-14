@@ -2,7 +2,6 @@ package sql
 
 import (
 	"context"
-
 	"github.com/maitesin/hermes/internal/app"
 	"github.com/upper/db/v4"
 )
@@ -14,7 +13,8 @@ const (
 func onConflictUpdateLogAndDelivered(queryIn string) string {
 	return queryIn + `ON CONFLICT (tracking_id) DO UPDATE SET
         log = EXCLUDED.log,
-        delivered = EXCLUDED.delivered
+        delivered = EXCLUDED.delivered,
+		conversation_id = EXCLUDED.conversation_id
 `
 }
 
@@ -85,7 +85,9 @@ func sql2AppDeliveries(sDeliveries ...Delivery) []app.Delivery {
 
 func app2SQLDelivery(dDelivery app.Delivery) Delivery {
 	return Delivery{
-		TrackingID: dDelivery.TrackingID,
-		Log:        dDelivery.Log,
+		TrackingID:     dDelivery.TrackingID,
+		Log:            dDelivery.Log,
+		ConversationID: dDelivery.ConversationID,
+		Delivered:      dDelivery.Delivered,
 	}
 }

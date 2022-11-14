@@ -50,7 +50,7 @@ func Checker(
 					NewDelivery(
 						dbDelivery.TrackingID,
 						eventsLog,
-						dbDelivery.ConversationID,
+						msg.Conversation,
 						delivered,
 					),
 				)
