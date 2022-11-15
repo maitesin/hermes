@@ -15,7 +15,7 @@ fmt: $(GOPATH)/bin/gofumpt
 fmt-check: $(GOPATH)/bin/gofumpt
 	gofumpt -d .
 
-lint: $(GOPATH)/bin/golangci-lint
+lint: generate $(GOPATH)/bin/golangci-lint
 	golangci-lint run
 
 generate: $(GOPATH)/bin/mockgen
