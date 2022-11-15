@@ -2,7 +2,6 @@ package telegram
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -14,14 +13,7 @@ type Listener struct {
 	api *tgbotapi.BotAPI
 }
 
-func NewListener(ctx context.Context, cfg Config) (*Listener, error) {
-	api, err := tgbotapi.NewBotAPI(cfg.Token)
-	if err != nil {
-		fmt.Println(err)
-		return &Listener{}, err
-	}
-
-	api.Debug = true
+func NewListener(ctx context.Context, api *tgbotapi.BotAPI) (*Listener, error) {
 	return &Listener{
 		ctx: ctx,
 		api: api,

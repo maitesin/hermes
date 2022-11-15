@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"embed"
 	"fmt"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 	"net/http"
 	"time"
@@ -73,7 +74,13 @@ func main() {
 		return
 	}
 
-	listener, err := telegram.NewListener(ctx, cfg.Telegram)
+	telegramBot, err := tgbotapi.NewBotAPI(cfg.Telegram.Token)
+	if err != nil {
+		log.Panic(err)
+		return
+	}
+
+	listener, err := telegram.NewListener(ctx, telegramBot)
 	if err != nil {
 		log.Panic(err)
 		return
@@ -88,7 +95,7 @@ func main() {
 	}()
 
 	ticker := time.NewTicker(time.Minute)
-	messenger, err := telegram.NewMessenger(ctx, cfg.Telegram)
+	messenger, err := telegram.NewMessenger(ctx, telegramBot)
 	if err != nil {
 		log.Panic(err)
 		return

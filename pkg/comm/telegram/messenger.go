@@ -2,30 +2,19 @@ package telegram
 
 import (
 	"context"
-	"fmt"
-
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/maitesin/hermes/pkg/comm"
 )
 
 type Messenger struct {
-	config Config
-	ctx    context.Context
-	api    *tgbotapi.BotAPI
+	ctx context.Context
+	api *tgbotapi.BotAPI
 }
 
-func NewMessenger(ctx context.Context, cfg Config) (*Messenger, error) {
-	api, err := tgbotapi.NewBotAPI(cfg.Token)
-	if err != nil {
-		fmt.Println(err)
-		return &Messenger{}, err
-	}
-
-	api.Debug = true
+func NewMessenger(ctx context.Context, api *tgbotapi.BotAPI) (*Messenger, error) {
 	return &Messenger{
-		ctx:    ctx,
-		api:    api,
-		config: cfg,
+		ctx: ctx,
+		api: api,
 	}, nil
 }
 
