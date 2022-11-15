@@ -2,6 +2,7 @@ package sql
 
 import (
 	"context"
+
 	"github.com/maitesin/hermes/internal/app"
 	"github.com/upper/db/v4"
 )
