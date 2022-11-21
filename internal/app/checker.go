@@ -33,11 +33,7 @@ func Checker(
 					return err
 				}
 
-				eventsLog, err := events2Log(events)
-				if err != nil {
-					return err
-				}
-
+				eventsLog := events2Log(events)
 				msg := comm.Message{
 					Conversation: dbDelivery.ConversationID,
 					Text:         fmt.Sprintf("%s:\n%s", dbDelivery.TrackingID, eventsLog),
@@ -67,15 +63,12 @@ func Checker(
 	}
 }
 
-func events2Log(events []tracker.DeliveryEvent) (string, error) {
-	var builder strings.Builder
+func events2Log(events []tracker.DeliveryEvent) string {
+	eventStrings := make([]string, len(events))
 
-	for _, event := range events {
-		_, err := builder.WriteString(fmt.Sprintf("- %s:\n  %s\n", event.Timestamp, event.Information))
-		if err != nil {
-			return "", err
-		}
+	for i, event := range events {
+		eventStrings[i] = fmt.Sprintf("- %s:\n  %s\n", event.Timestamp, event.Information)
 	}
 
-	return builder.String(), nil
+	return strings.Join(eventStrings, "")
 }
