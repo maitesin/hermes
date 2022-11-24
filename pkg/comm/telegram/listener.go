@@ -21,11 +21,12 @@ func NewListener(ctx context.Context, api *tgbotapi.BotAPI) (*Listener, error) {
 }
 
 func (l *Listener) Listen(ctx context.Context, handler comm.Handler) error {
+	updatesChannel := l.getUpdatesChannel()
 	for {
 		select {
 		case <-ctx.Done():
 			return nil
-		case update := <-l.getUpdatesChannel():
+		case update := <-updatesChannel:
 			if update.Message == nil { // ignore any non-Message Updates
 				continue
 			}

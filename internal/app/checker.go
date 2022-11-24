@@ -34,16 +34,18 @@ func Checker(
 				}
 
 				eventsLog := events2Log(events)
-				msg := comm.Message{
-					Conversation: dbDelivery.ConversationID,
-					Text:         fmt.Sprintf("%s:\n%s", dbDelivery.TrackingID, eventsLog),
-				}
+				if eventsLog != dbDelivery.Log {
+					msg := comm.Message{
+						Conversation: dbDelivery.ConversationID,
+						Text:         fmt.Sprintf("%s:\n%s", dbDelivery.TrackingID, eventsLog),
+					}
 
-				err = messenger.Message(
-					msg,
-				)
-				if err != nil {
-					return err
+					err = messenger.Message(
+						msg,
+					)
+					if err != nil {
+						return err
+					}
 				}
 
 				err = deliveriesRepository.Insert(
@@ -51,7 +53,7 @@ func Checker(
 					NewDelivery(
 						dbDelivery.TrackingID,
 						eventsLog,
-						msg.Conversation,
+						dbDelivery.ConversationID,
 						delivered,
 					),
 				)
