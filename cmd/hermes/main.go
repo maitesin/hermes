@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"embed"
-	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 	"net/http"
@@ -89,7 +88,7 @@ func main() {
 	go func() {
 		err := listener.Listen(ctx, app.Listen(ctx, correosTracker, deliveriesRepository))
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return
 		}
 	}()
