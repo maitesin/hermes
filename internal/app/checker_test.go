@@ -111,7 +111,7 @@ func TestChecker(t *testing.T) {
 					}, nil)
 			},
 			messengerChecks: func(mm *mMock.MockMessenger) {},
-			wantErr:         errors.New("something went wrong"),
+			wantErr:         nil,
 		},
 		{
 			name: `Given a working tracker checker, a working deliveries repository and a failing messenger checker,

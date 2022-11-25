@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -30,7 +31,8 @@ func Checker(
 			for _, dbDelivery := range deliveries {
 				events, delivered, err := t.Track(dbDelivery.TrackingID)
 				if err != nil {
-					return err
+					log.Printf("Error found when getting information from trackers: %s", err.Error())
+					continue
 				}
 
 				eventsLog := events2Log(events)
