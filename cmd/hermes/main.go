@@ -4,16 +4,16 @@ import (
 	"context"
 	"database/sql"
 	"embed"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 	"net/http"
 	"time"
 
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/maitesin/hermes/config"
 	"github.com/maitesin/hermes/internal/app"
-	"github.com/maitesin/hermes/internal/infra/migrations"
 	sqlx "github.com/maitesin/hermes/internal/infra/sql"
 	"github.com/maitesin/hermes/pkg/comm/telegram"
 	"github.com/maitesin/hermes/pkg/tracker/correos"
@@ -45,14 +45,13 @@ func main() {
 	}
 	defer pgConn.Close()
 
-	dbDriver, err := postgres.WithInstance(dbConn, &postgres.Config{})
+	d, err := iofs.New(migrationsFS, "migrations")
 	if err != nil {
 		log.Panic(err)
 		return
 	}
 
-	migrations.RegisterMigrationDriver(migrationsFS)
-	migrations, err := migrate.NewWithDatabaseInstance("embed://migrations", "marvin", dbDriver)
+	migrations, err := migrate.NewWithSourceInstance("iofs", d, cfg.SQL.DatabaseURL())
 	if err != nil {
 		log.Panic(err)
 		return
