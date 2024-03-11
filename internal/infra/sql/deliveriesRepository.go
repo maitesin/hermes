@@ -15,7 +15,8 @@ func onConflictUpdateLogAndDelivered(queryIn string) string {
 	return queryIn + `ON CONFLICT (tracking_id) DO UPDATE SET
         log = EXCLUDED.log,
         delivered = EXCLUDED.delivered,
-		conversation_id = EXCLUDED.conversation_id
+		conversation_id = EXCLUDED.conversation_id,
+		courier = EXCLUDED.courier
 `
 }
 
@@ -24,6 +25,7 @@ type Delivery struct {
 	Log            string `db:"log"`
 	ConversationID int64  `db:"conversation_id"`
 	Delivered      bool   `db:"delivered"`
+	Courier        string `db:"courier"`
 }
 
 type DeliveriesRepository struct {
