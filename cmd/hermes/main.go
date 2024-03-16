@@ -92,6 +92,10 @@ func main() {
 		}
 	}()
 
+	go func() {
+		http.ListenAndServe("0.0.0.0:8181", app.Asdf(deliveriesRepository))
+	}()
+
 	ticker := time.NewTicker(time.Minute)
 	messenger, err := telegram.NewMessenger(ctx, telegramBot)
 	if err != nil {
