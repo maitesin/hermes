@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/maitesin/hermes/pkg/tracker/group"
+
 	"github.com/golang/mock/gomock"
 	"github.com/maitesin/hermes/internal/app"
 	appMock "github.com/maitesin/hermes/internal/app/mocks"
@@ -42,6 +44,8 @@ func TestChecker(t *testing.T) {
 							Information: "Something",
 						},
 					}, false, nil)
+
+				mt.EXPECT().Name().Return("correos")
 			},
 			deliveriesRepositoryChecks: func(ctx context.Context, mdr *appMock.MockDeliveriesRepository) {
 				mdr.
@@ -49,6 +53,7 @@ func TestChecker(t *testing.T) {
 					FindAllNotDelivered(ctx).
 					Return([]app.Delivery{
 						{
+							Courier:        "correos",
 							TrackingID:     "1234",
 							Log:            "Wololo",
 							ConversationID: 9876,
@@ -59,7 +64,7 @@ func TestChecker(t *testing.T) {
 					EXPECT().
 					Insert(
 						ctx,
-						app.NewDelivery("1234", "- 666:\n  Something\n", 9876, false),
+						app.NewDelivery("correos", "1234", "- 666:\n  Something\n", 9876, false),
 					).
 					Return(nil)
 			},
@@ -127,6 +132,8 @@ func TestChecker(t *testing.T) {
 							Information: "Something",
 						},
 					}, false, nil)
+
+				mt.EXPECT().Name().Return("correos")
 			},
 			deliveriesRepositoryChecks: func(ctx context.Context, mdr *appMock.MockDeliveriesRepository) {
 				mdr.
@@ -134,6 +141,7 @@ func TestChecker(t *testing.T) {
 					FindAllNotDelivered(ctx).
 					Return([]app.Delivery{
 						{
+							Courier:        "correos",
 							TrackingID:     "1234",
 							Log:            "Wololo",
 							ConversationID: 9876,
@@ -165,6 +173,8 @@ func TestChecker(t *testing.T) {
 							Information: "Something",
 						},
 					}, false, nil)
+
+				mt.EXPECT().Name().Return("correos")
 			},
 			deliveriesRepositoryChecks: func(ctx context.Context, mdr *appMock.MockDeliveriesRepository) {
 				mdr.
@@ -182,7 +192,7 @@ func TestChecker(t *testing.T) {
 					EXPECT().
 					Insert(
 						ctx,
-						app.NewDelivery("1234", "- 666:\n  Something\n", 9876, false),
+						app.NewDelivery("correos", "1234", "- 666:\n  Something\n", 9876, false),
 					).
 					Return(errors.New("something went wrong"))
 			},
@@ -217,7 +227,7 @@ func TestChecker(t *testing.T) {
 			tt.messengerChecks(mockMessenger)
 
 			go func() {
-				err := app.Checker(ctx, ticker, mockTracker, mockDeliveriesRepository, mockMessenger)
+				err := app.Checker(ctx, ticker, group.NewGroup(mockTracker), mockDeliveriesRepository, mockMessenger)
 				if tt.wantErr != nil {
 					require.ErrorAs(t, err, &tt.wantErr)
 				} else {

@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/maitesin/hermes/pkg/tracker/group"
+
 	"github.com/golang/mock/gomock"
 	"github.com/maitesin/hermes/internal/app"
 	appMock "github.com/maitesin/hermes/internal/app/mocks"
@@ -33,9 +35,10 @@ func TestListen(t *testing.T) {
 			},
 			trackerChecks: func(mt *tmock.MockTracker) {
 				mt.EXPECT().Track("1234")
+				mt.EXPECT().Name().Return("correos")
 			},
 			deliveriesRepositoryChecks: func(mdr *appMock.MockDeliveriesRepository) {
-				mdr.EXPECT().Insert(context.Background(), app.NewDelivery("1234", "[]", 0, false))
+				mdr.EXPECT().Insert(context.Background(), app.NewDelivery("correos", "1234", "[]", 0, false))
 			},
 			wantErr: nil,
 		},
@@ -61,12 +64,13 @@ func TestListen(t *testing.T) {
 			},
 			trackerChecks: func(mt *tmock.MockTracker) {
 				mt.EXPECT().Track("1234")
+				mt.EXPECT().Name().Return("correos")
 			},
 			deliveriesRepositoryChecks: func(mdr *appMock.MockDeliveriesRepository) {
 				mdr.EXPECT().
 					Insert(
 						context.Background(),
-						app.NewDelivery("1234", "[]", 0, false),
+						app.NewDelivery("correos", "1234", "[]", 0, false),
 					).
 					Return(app.NewDeliveryNotFoundError("1234"))
 			},
@@ -86,7 +90,7 @@ func TestListen(t *testing.T) {
 			tt.trackerChecks(mockTracker)
 			tt.deliveriesRepositoryChecks(mockDeliveriesRepository)
 
-			gotListen := app.Listen(ctx, mockTracker, mockDeliveriesRepository)
+			gotListen := app.Listen(ctx, group.NewGroup(mockTracker), mockDeliveriesRepository)
 			err := gotListen(tt.message)
 			if tt.wantErr != nil {
 				require.ErrorAs(t, err, &tt.wantErr)

@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/maitesin/hermes/pkg/tracker/group"
+
 	"github.com/maitesin/hermes/pkg/comm"
 	"github.com/maitesin/hermes/pkg/tracker"
 )
@@ -14,7 +16,7 @@ import (
 func Checker(
 	ctx context.Context,
 	ticker *time.Ticker,
-	t tracker.Tracker,
+	g group.Group,
 	deliveriesRepository DeliveriesRepository,
 	messenger comm.Messenger,
 ) error {
@@ -29,7 +31,7 @@ func Checker(
 			}
 
 			for _, dbDelivery := range deliveries {
-				events, delivered, err := t.Track(dbDelivery.TrackingID)
+				name, events, delivered, err := g.Track(dbDelivery.TrackingID)
 				if err != nil {
 					log.Printf("Error found when getting information from trackers: %s", err.Error())
 					continue
@@ -53,6 +55,7 @@ func Checker(
 				err = deliveriesRepository.Insert(
 					ctx,
 					NewDelivery(
+						name,
 						dbDelivery.TrackingID,
 						eventsLog,
 						dbDelivery.ConversationID,

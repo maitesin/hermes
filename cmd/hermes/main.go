@@ -8,15 +8,21 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/maitesin/hermes/pkg/tracker/group"
+
+	"github.com/maitesin/hermes/pkg/tracker/correos"
+
+	"github.com/maitesin/hermes/pkg/tracker/dhl"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/maitesin/hermes/config"
 	"github.com/maitesin/hermes/internal/app"
+	"github.com/maitesin/hermes/internal/infra/httpx"
 	sqlx "github.com/maitesin/hermes/internal/infra/sql"
 	"github.com/maitesin/hermes/pkg/comm/telegram"
-	"github.com/maitesin/hermes/pkg/tracker/correos"
 	"github.com/upper/db/v4/adapter/postgresql"
 )
 
@@ -72,6 +78,14 @@ func main() {
 		return
 	}
 
+	dhlTracker, err := dhl.NewTracker(httpClient)
+	if err != nil {
+		log.Panic(err)
+		return
+	}
+
+	groupTracker := group.NewGroup(correosTracker, dhlTracker)
+
 	telegramBot, err := tgbotapi.NewBotAPI(cfg.Telegram.Token)
 	if err != nil {
 		log.Panic(err)
@@ -85,7 +99,7 @@ func main() {
 	}
 
 	go func() {
-		err := listener.Listen(ctx, app.Listen(ctx, correosTracker, deliveriesRepository))
+		err := listener.Listen(ctx, app.Listen(ctx, groupTracker, deliveriesRepository))
 		if err != nil {
 			log.Println(err)
 			return
@@ -93,17 +107,21 @@ func main() {
 	}()
 
 	go func() {
-		http.ListenAndServe("0.0.0.0:8181", app.Asdf(deliveriesRepository))
+		err := http.ListenAndServe("0.0.0.0:8181", httpx.ListUndelivered(deliveriesRepository))
+		if err != nil {
+			log.Println(err)
+			return
+		}
 	}()
 
-	ticker := time.NewTicker(time.Minute)
+	ticker := time.NewTicker(10 * time.Minute)
 	messenger, err := telegram.NewMessenger(ctx, telegramBot)
 	if err != nil {
 		log.Panic(err)
 		return
 	}
 
-	err = app.Checker(ctx, ticker, correosTracker, deliveriesRepository, messenger)
+	err = app.Checker(ctx, ticker, groupTracker, deliveriesRepository, messenger)
 	if err != nil {
 		log.Panic(err)
 		return

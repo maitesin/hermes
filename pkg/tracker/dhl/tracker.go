@@ -1,6 +1,4 @@
-// Correos is the Spanish national mail service https://www.correos.es/
-
-package correos
+package dhl
 
 import (
 	"encoding/json"
@@ -12,14 +10,14 @@ import (
 	"github.com/maitesin/hermes/pkg/tracker"
 )
 
-const urlRegex = "https://api1.correos.es/digital-services/searchengines/api/v1/?text=%s&language=ES&searchType=envio"
+const urlRegex = "https://api-eu.dhl.com/track/shipments?trackingNumber=%s"
 
-// Tracker for the Correos delivery service
+// Tracker for the DHL delivery service
 type Tracker struct {
 	client *http.Client
 }
 
-// NewTracker constructor for the Correos tracker
+// NewTracker constructor for the DHL tracker
 func NewTracker(client *http.Client) (*Tracker, error) {
 	return &Tracker{
 		client: client,
@@ -27,7 +25,7 @@ func NewTracker(client *http.Client) (*Tracker, error) {
 }
 
 func (t Tracker) Name() string {
-	return "correos"
+	return "dhl"
 }
 
 func (t *Tracker) Track(id string) ([]tracker.DeliveryEvent, bool, error) {
@@ -56,11 +54,11 @@ func (t *Tracker) Track(id string) ([]tracker.DeliveryEvent, bool, error) {
 	events := make([]tracker.DeliveryEvent, len(body.Shipments[0].Events))
 	for i, event := range body.Shipments[0].Events {
 		events[i] = tracker.DeliveryEvent{
-			Timestamp:   fmt.Sprintf("%s %s", event.Date, event.Time),
-			Information: fmt.Sprintf("%s (%s)", event.SummaryText, event.ExtendedText),
+			Timestamp:   fmt.Sprintf("%s", event.Date),
+			Information: fmt.Sprintf("%s", event.ExtendedText),
 		}
 		if !delivered {
-			delivered = strings.Contains(events[i].Information, "Entregado")
+			delivered = strings.Contains(events[i].Information, "Delivered")
 		}
 	}
 

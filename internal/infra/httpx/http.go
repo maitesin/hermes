@@ -1,11 +1,13 @@
-package app
+package httpx
 
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/maitesin/hermes/internal/app"
 )
 
-func Asdf(repository DeliveriesRepository) http.HandlerFunc {
+func ListUndelivered(repository app.DeliveriesRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		deliveries, err := repository.FindAllNotDelivered(r.Context())
 		if err != nil {

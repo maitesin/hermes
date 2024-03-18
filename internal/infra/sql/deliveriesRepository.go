@@ -61,7 +61,7 @@ func (dr *DeliveriesRepository) FindByTrackingID(ctx context.Context, trackingID
 		}
 		return app.Delivery{}, err
 	}
-	return app.NewDelivery(delivery.TrackingID, delivery.Log, delivery.ConversationID, delivery.Delivered), nil
+	return app.NewDelivery(delivery.Courier, delivery.TrackingID, delivery.Log, delivery.ConversationID, delivery.Delivered), nil
 }
 
 func (dr *DeliveriesRepository) FindAllNotDelivered(ctx context.Context) ([]app.Delivery, error) {
@@ -80,7 +80,13 @@ func sql2AppDeliveries(sDeliveries ...Delivery) []app.Delivery {
 	deliveries := make([]app.Delivery, len(sDeliveries))
 
 	for i := range sDeliveries {
-		deliveries[i] = app.NewDelivery(sDeliveries[i].TrackingID, sDeliveries[i].Log, sDeliveries[i].ConversationID, sDeliveries[i].Delivered)
+		deliveries[i] = app.NewDelivery(
+			sDeliveries[i].Courier,
+			sDeliveries[i].TrackingID,
+			sDeliveries[i].Log,
+			sDeliveries[i].ConversationID,
+			sDeliveries[i].Delivered,
+		)
 	}
 
 	return deliveries
@@ -92,5 +98,6 @@ func app2SQLDelivery(dDelivery app.Delivery) Delivery {
 		Log:            dDelivery.Log,
 		ConversationID: dDelivery.ConversationID,
 		Delivered:      dDelivery.Delivered,
+		Courier:        dDelivery.Courier,
 	}
 }
