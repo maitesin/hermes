@@ -16,7 +16,7 @@ func ListUndelivered(repository app.DeliveriesRepository) http.HandlerFunc {
 		}
 		w.Write([]byte("<h1>Undelivered</h1>"))
 		for _, delivery := range deliveries {
-			w.Write([]byte(fmt.Sprintf("<h2>%s</h2><br>%s", delivery.TrackingID, delivery.Log)))
+			w.Write([]byte(fmt.Sprintf("<h2>%s</h2><br>%s<br>%s<br>", delivery.TrackingID, delivery.Courier, delivery.Log)))
 		}
 	}
 }

@@ -8,12 +8,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/maitesin/hermes/pkg/tracker/group"
-
-	"github.com/maitesin/hermes/pkg/tracker/correos"
-
-	"github.com/maitesin/hermes/pkg/tracker/dhl"
-
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -23,6 +17,9 @@ import (
 	"github.com/maitesin/hermes/internal/infra/httpx"
 	sqlx "github.com/maitesin/hermes/internal/infra/sql"
 	"github.com/maitesin/hermes/pkg/comm/telegram"
+	"github.com/maitesin/hermes/pkg/tracker/correos"
+	"github.com/maitesin/hermes/pkg/tracker/dhl"
+	"github.com/maitesin/hermes/pkg/tracker/group"
 	"github.com/upper/db/v4/adapter/postgresql"
 )
 
