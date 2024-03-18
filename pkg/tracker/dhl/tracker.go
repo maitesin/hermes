@@ -47,7 +47,11 @@ func (t *Tracker) Track(id string) ([]tracker.DeliveryEvent, bool, error) {
 	}
 
 	if len(body.Shipments) != 1 {
-		return nil, false, fmt.Errorf("expected information from a single shipment, found %d", len(body.Shipments))
+		return nil, false, fmt.Errorf(
+			"expected information from a single shipment, found %d.\n%s",
+			len(body.Shipments),
+			body,
+		)
 	}
 
 	var delivered bool
