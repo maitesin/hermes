@@ -75,7 +75,7 @@ func main() {
 		return
 	}
 
-	dhlTracker, err := dhl.NewTracker(httpClient)
+	dhlTracker, err := dhl.NewTracker(httpClient, cfg.DHLAPIKey)
 	if err != nil {
 		log.Panic(err)
 		return

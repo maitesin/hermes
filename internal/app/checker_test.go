@@ -102,6 +102,8 @@ func TestChecker(t *testing.T) {
 					EXPECT().
 					Track("1234").
 					Return(nil, false, errors.New("something went wrong"))
+
+				mt.EXPECT().Name().Return("correos")
 			},
 			deliveriesRepositoryChecks: func(ctx context.Context, mdr *appMock.MockDeliveriesRepository) {
 				mdr.

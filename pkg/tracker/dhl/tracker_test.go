@@ -226,7 +226,7 @@ func TestTracker_Track(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			trackerTest, err := dhl.NewTracker(tt.client)
+			trackerTest, err := dhl.NewTracker(tt.client, "")
 			require.Nil(t, err)
 
 			gotEvents, gotDelivered, err := trackerTest.Track("does not matter regarding testing")

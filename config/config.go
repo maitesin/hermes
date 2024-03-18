@@ -9,14 +9,20 @@ import (
 )
 
 type Config struct {
-	Telegram telegram.Config
-	SQL      sql.Config
+	Telegram  telegram.Config
+	SQL       sql.Config
+	DHLAPIKey string
 }
 
 func New() (Config, error) {
 	telegramToken := os.Getenv("TELEGRAM_TOKEN")
 	if telegramToken == "" {
 		return Config{}, Error{reason: "TELEGRAM_TOKEN not set"}
+	}
+
+	dhlAPIKey := os.Getenv("DHL_API_KEY")
+	if telegramToken == "" {
+		return Config{}, Error{reason: "DHL_API_KEY not set"}
 	}
 
 	return Config{
@@ -28,6 +34,7 @@ func New() (Config, error) {
 			SSLMode:      getEnvOrDefault("DB_SSL_MODE", "disable"),
 			BinaryParams: getEnvOrDefault("DB_BINARY_PARAMETERS", "yes"),
 		},
+		DHLAPIKey: dhlAPIKey,
 	}, nil
 }
 

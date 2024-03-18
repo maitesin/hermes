@@ -15,12 +15,14 @@ const urlRegex = "https://api-eu.dhl.com/track/shipments?trackingNumber=%s"
 // Tracker for the DHL delivery service
 type Tracker struct {
 	client *http.Client
+	key    string
 }
 
 // NewTracker constructor for the DHL tracker
-func NewTracker(client *http.Client) (*Tracker, error) {
+func NewTracker(client *http.Client, key string) (*Tracker, error) {
 	return &Tracker{
 		client: client,
+		key:    key,
 	}, nil
 }
 
@@ -29,7 +31,13 @@ func (t Tracker) Name() string {
 }
 
 func (t *Tracker) Track(id string) ([]tracker.DeliveryEvent, bool, error) {
-	resp, err := t.client.Get(fmt.Sprintf(urlRegex, id))
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(urlRegex, id), nil)
+	if err != nil {
+		return nil, false, err
+	}
+
+	req.Header = http.Header{"DHL-API-Key": []string{t.key}}
+	resp, err := t.client.Do(req)
 	if err != nil {
 		return nil, false, err
 	}

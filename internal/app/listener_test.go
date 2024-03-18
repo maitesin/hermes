@@ -51,6 +51,7 @@ func TestListen(t *testing.T) {
 			},
 			trackerChecks: func(mt *tmock.MockTracker) {
 				mt.EXPECT().Track("1234").Return(nil, false, app.NewDeliveryNotFoundError("1234"))
+				mt.EXPECT().Name().Return("correos")
 			},
 			deliveriesRepositoryChecks: func(mdr *appMock.MockDeliveriesRepository) {},
 			wantErr:                    app.NewDeliveryNotFoundError("1234"),
