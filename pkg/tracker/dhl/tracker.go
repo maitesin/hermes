@@ -70,7 +70,7 @@ func (t *Tracker) Track(id string) ([]tracker.DeliveryEvent, bool, error) {
 			Information: fmt.Sprintf("%s", event.ExtendedText),
 		}
 		if !delivered {
-			delivered = strings.Contains(events[i].Information, "Delivered")
+			delivered = strings.Contains(events[i].Information, "elivered")
 		}
 	}
 
