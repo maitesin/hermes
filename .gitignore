@@ -25,3 +25,5 @@ go.work
 */**/mocks
 
 coverage.out
+
+db.sqlite
