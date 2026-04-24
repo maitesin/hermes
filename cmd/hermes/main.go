@@ -4,14 +4,17 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"errors"
 	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/golang-migrate/migrate/v4/database/sqlite3"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
+	
 	"github.com/maitesin/hermes/config"
 	"github.com/maitesin/hermes/internal/app"
 	"github.com/maitesin/hermes/internal/infra/httpx"
@@ -20,7 +23,6 @@ import (
 	"github.com/maitesin/hermes/pkg/tracker/correos"
 	"github.com/maitesin/hermes/pkg/tracker/dhl"
 	"github.com/maitesin/hermes/pkg/tracker/group"
-	"github.com/upper/db/v4/adapter/postgresql"
 )
 
 //go:embed migrations/*.sql
@@ -34,39 +36,38 @@ func main() {
 		return
 	}
 
-	dbConn, err := sql.Open("postgres", cfg.SQL.DatabaseURL())
+	dMigrations, err := iofs.New(migrationsFS, "migrations")
 	if err != nil {
-		log.Panic(err)
-		return
+		slog.ErrorContext(ctx, err.Error())
+		panic(err)
 	}
-	defer dbConn.Close()
 
-	pgConn, err := postgresql.New(dbConn)
+	db, err := sql.Open("sqlite3", "./db.sqlite")
 	if err != nil {
-		log.Panic(err)
-		return
+		slog.ErrorContext(ctx, err.Error())
+		panic(err)
 	}
-	defer pgConn.Close()
+	defer db.Close()
 
-	d, err := iofs.New(migrationsFS, "migrations")
+	driver, err := sqlite3.WithInstance(db, &sqlite3.Config{})
 	if err != nil {
-		log.Panic(err)
-		return
+		slog.ErrorContext(ctx, err.Error())
+		panic(err)
 	}
 
-	migrations, err := migrate.NewWithSourceInstance("iofs", d, cfg.SQL.DatabaseURL())
+	dbDriver, err := migrate.NewWithInstance("iofs", dMigrations, "", driver)
 	if err != nil {
+		slog.ErrorContext(ctx, err.Error())
+		panic(err)
+	}
+
+	err = dbDriver.Up()
+	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		log.Panic(err)
 		return
 	}
 
-	err = migrations.Up()
-	if err != nil && err.Error() != "no change" {
-		log.Panic(err)
-		return
-	}
-
-	deliveriesRepository := sqlx.NewDeliveriesRepository(pgConn)
+	deliveriesRepository := sqlx.NewDeliveriesRepository(db)
 
 	httpClient := http.DefaultClient
 	correosTracker, err := correos.NewTracker(httpClient)

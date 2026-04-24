@@ -2,23 +2,10 @@ package sql
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/maitesin/hermes/internal/app"
-	"github.com/upper/db/v4"
 )
-
-const (
-	deliveryTable = "deliveries"
-)
-
-func onConflictUpdateLogAndDelivered(queryIn string) string {
-	return queryIn + `ON CONFLICT (tracking_id) DO UPDATE SET
-        log = EXCLUDED.log,
-        delivered = EXCLUDED.delivered,
-		conversation_id = EXCLUDED.conversation_id,
-		courier = EXCLUDED.courier
-`
-}
 
 type Delivery struct {
 	TrackingID     string `db:"tracking_id"`
@@ -29,50 +16,71 @@ type Delivery struct {
 }
 
 type DeliveriesRepository struct {
-	sess db.Session
+	db *sql.DB
 }
 
-func NewDeliveriesRepository(sess db.Session) *DeliveriesRepository {
-	return &DeliveriesRepository{sess: sess}
+func NewDeliveriesRepository(db *sql.DB) *DeliveriesRepository {
+	return &DeliveriesRepository{db: db}
 }
 
 func (dr *DeliveriesRepository) Insert(ctx context.Context, delivery app.Delivery) error {
 	sDelivery := app2SQLDelivery(delivery)
 
-	_, err := dr.sess.WithContext(ctx).
-		SQL().
-		InsertInto(deliveryTable).
-		Values(sDelivery).
-		Amend(onConflictUpdateLogAndDelivered).
-		Exec()
+	_, err := dr.db.ExecContext(
+		ctx,
+		"INSERT INTO deliveries (tracking_id, log, conversation_id, courier, delivered) VALUES (?, ?, ?, ?, ?)",
+		sDelivery.TrackingID,
+		sDelivery.Log,
+		sDelivery.ConversationID,
+		sDelivery.Courier,
+		sDelivery.Delivered,
+	)
 
+	return err
+}
+
+func (dr *DeliveriesRepository) Update(ctx context.Context, delivery app.Delivery) error {
+	sDelivery := app2SQLDelivery(delivery)
+
+	_, err := dr.db.ExecContext(
+		ctx,
+		"UPDATE deliveries SET delivered = ?, log = ? WHERE tracking_id = ? and conversation_id = ?",
+		sDelivery.Delivered,
+		sDelivery.Log,
+		sDelivery.TrackingID,
+		sDelivery.ConversationID,
+	)
 	return err
 }
 
 func (dr *DeliveriesRepository) FindByTrackingID(ctx context.Context, trackingID string) (app.Delivery, error) {
 	var delivery Delivery
-	err := dr.sess.WithContext(ctx).
-		Collection(deliveryTable).
-		Find(db.Cond{"tracking_id": trackingID}).
-		One(&delivery)
+	row, err := dr.db.QueryContext(ctx, "SELECT tracking_id, log, conversation_id, courier, delivered FROM deliveries WHERE tracking_id = ?", trackingID)
 	if err != nil {
-		if err == db.ErrNoMoreRows {
-			return app.Delivery{}, app.NewDeliveryNotFoundError(trackingID)
-		}
 		return app.Delivery{}, err
 	}
-	return app.NewDelivery(delivery.Courier, delivery.TrackingID, delivery.Log, delivery.ConversationID, delivery.Delivered), nil
+	defer row.Close()
+	err = row.Scan(&delivery.TrackingID, &delivery.Log, &delivery.ConversationID, &delivery.Delivered)
+	return app.NewDelivery(delivery.Courier, delivery.TrackingID, delivery.Log, delivery.ConversationID, delivery.Delivered), err
 }
 
 func (dr *DeliveriesRepository) FindAllNotDelivered(ctx context.Context) ([]app.Delivery, error) {
 	var deliveries []Delivery
-	err := dr.sess.WithContext(ctx).
-		Collection(deliveryTable).
-		Find(db.Cond{"delivered": false}).
-		All(&deliveries)
+	rows, err := dr.db.QueryContext(ctx, "SELECT tracking_id, log, conversation_id, courier, delivered FROM deliveries WHERE delivered = FALSE")
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var delivery Delivery
+		err = rows.Scan(&delivery.TrackingID, &delivery.Log, &delivery.ConversationID, &delivery.Courier, &delivery.Delivered)
+		if err != nil {
+			return nil, err
+		}
+		deliveries = append(deliveries, delivery)
+	}
+
 	return sql2AppDeliveries(deliveries...), nil
 }
 

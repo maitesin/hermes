@@ -3,14 +3,11 @@ package config
 import (
 	"os"
 
-	"github.com/maitesin/hermes/internal/infra/sql"
-
 	"github.com/maitesin/hermes/pkg/comm/telegram"
 )
 
 type Config struct {
 	Telegram  telegram.Config
-	SQL       sql.Config
 	DHLAPIKey string
 }
 
@@ -28,11 +25,6 @@ func New() (Config, error) {
 	return Config{
 		Telegram: telegram.Config{
 			Token: telegramToken,
-		},
-		SQL: sql.Config{
-			URL:          getEnvOrDefault("DB_URL", "postgres://postgres:postgres@localhost:54321/hermes"),
-			SSLMode:      getEnvOrDefault("DB_SSL_MODE", "disable"),
-			BinaryParams: getEnvOrDefault("DB_BINARY_PARAMETERS", "yes"),
 		},
 		DHLAPIKey: dhlAPIKey,
 	}, nil

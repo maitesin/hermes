@@ -62,7 +62,7 @@ func TestChecker(t *testing.T) {
 
 				mdr.
 					EXPECT().
-					Insert(
+					Update(
 						ctx,
 						app.NewDelivery("correos", "1234", "- 666:\n  Something\n", 9876, false),
 					).
@@ -192,7 +192,7 @@ func TestChecker(t *testing.T) {
 
 				mdr.
 					EXPECT().
-					Insert(
+					Update(
 						ctx,
 						app.NewDelivery("correos", "1234", "- 666:\n  Something\n", 9876, false),
 					).

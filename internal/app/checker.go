@@ -52,7 +52,7 @@ func Checker(
 					}
 				}
 
-				err = deliveriesRepository.Insert(
+				err = deliveriesRepository.Update(
 					ctx,
 					NewDelivery(
 						name,
